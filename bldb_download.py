@@ -13,6 +13,7 @@ import urllib.request
 from pathlib import Path
 import time
 import warnings
+import sys
 
 # %%
 def get_args():
@@ -25,13 +26,19 @@ def get_args():
     parser.add_argument(
         '-u', '--url', default='http://www.bldb.eu/seq_prot/',
         type=str,
-        help="Parent URL of proteins. Modify in case it has changed"
+        help="Parent URL of proteins. Default: http://www.bldb.eu/seq_prot/"
     )
 
     parser.add_argument(
         '-r', '--retries', default=3,
         type=int,
         help="Number of download retries if connection error"
+    )
+
+    parser.add_argument(
+        '-d', '--delay', default=0,
+        type=float,
+        help="Seconds of delay between downloads. Default: 0"
     )
 
     parser.add_argument(
@@ -43,7 +50,6 @@ def get_args():
     return parser.parse_args()
 
 # %%
-STD_DELAY = 0.35
 ERROR_DELAY = 5
 
 # %%
@@ -58,8 +64,9 @@ def main():
     n_list = len(list_fastas)
     print(f"Downloading {n_list} sequences: ")
 
+    error_list = []
     for i, fasta in enumerate(list_fastas):
-        update_status = int(i // n_list )
+        update_status = int(i * 100 // n_list )
         print("[%-50s] %d%% %s (%d/%d)" % ('=' * (update_status // 2), update_status, fasta, i, n_list), end = '\r')
         success = False
         for n in range(args.retries):
@@ -68,13 +75,20 @@ def main():
                 dest = args.output / Path(fasta)
                 urllib.request.urlretrieve(url, dest)
                 success = True
-                time.sleep(STD_DELAY)
+                time.sleep(args.delay)
                 break
             except Exception as e:
                 warnings.warn(f"Retry {n+1} for {fasta} failed: {e}")
                 time.sleep(ERROR_DELAY)
         if not success:
             warnings.warn(f"Failed to download {fasta} after {args.retries} retries.")
+            error_list.append(fasta.replace(".fasta", ""))
+
+    print("Finished download")
+    print(f"{n_list - len(error_list)} successful downloads")
+    print(f"{len(error_list)} unsuccessful downloads:")
+    print(','.join(error_list))
+
 
 # %%
 if __name__ == "__main__":
