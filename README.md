@@ -1,6 +1,6 @@
 # BLDB_download
 
-Python script to programmatically download all protein sequences at [BLDB](http://www.bldb.eu/).
+Python script to programmatically download all protein sequences and tables at [BLDB](http://www.bldb.eu/).
 
 ## Usage
 ```
@@ -10,7 +10,7 @@ Programmatic download of all protein sequences from BLDB.
 
 options:
   -h, --help            show this help message and exit
-  -u URL, --url URL     Parent URL of proteins. Default: http://www.bldb.eu/seq_prot/
+  -u URL, --url URL     Parent URL of proteins. Default: http://www.bldb.eu/
   -r RETRIES, --retries RETRIES
                         Number of download retries if connection error
   -d DELAY, --delay DELAY
